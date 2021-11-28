@@ -4,7 +4,7 @@ MPI-IO provides a large number of rutines to read and write data from a file `(I
 
 Here we will explore the process to `open` and `write ` on the file.  
 
-The routine ` MPI_File_open()' oepn the file on all processes int the communicator. 
+The routine ` MPI_File_open()` open the file on all processes int the communicator. 
 
 ```
 int MPI_File_open( MPI_Comm comm, char *filename, int amode, MPI_Info info, MPI_File *fh)
@@ -27,7 +27,7 @@ MPI allow reading/ write using two different king file pointer:
 shared pointer for writing or reading at a time. See [here](http://personalpages.to.infn.it/~mignone/MPI/lecture5.pdf) page 10 for detail.
 
 
-``individual file pointer ` : each process has it own local file pointer for seek, read, and write operations. 
+`individual file pointer ` : each process has it own local file pointer for seek, read, and write operations. 
 
 
 In our example, we want all the processor to write their result on the same file so, we will used
