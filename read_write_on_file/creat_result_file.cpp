@@ -9,7 +9,7 @@ int main(int arg, char **argv) {
 	
 	if(result.is_open())
 	{
-		result<< "Size/Rank/walltime";
+		result<< "Size;Rank;walltime";
 	}
 	else{ std::cout<< "file not open";
 		return 5;

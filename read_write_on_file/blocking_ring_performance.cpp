@@ -35,7 +35,7 @@ int main(int argc,char *argv[]){
 	if(rank== (numtasks-1)) next = 0;
 		
 
-	int N = 100;// number of iteration to get a walltime mean 
+	int N = 500;// number of iteration to get a runtime mean 
 
 	for(int i = 0; i< N; i++)
 	{
@@ -111,7 +111,7 @@ int main(int argc,char *argv[]){
 
 	mean = mean + (endtime-starttime);
 	
-	myFile<< numtasks<<"/"<<rank<<"/"<<mean/N<<"\n"; //write on the file 
+	myFile<< numtasks<<";"<<rank<<";"<<mean/N<<"\n"; //write on the file 
 	
 	}// iteration
 
