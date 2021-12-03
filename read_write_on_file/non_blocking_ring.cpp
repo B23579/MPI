@@ -11,13 +11,14 @@ int main(int argc,char *argv[]){
 	
 	std::fstream myFile;
 
-	MPI_Status stats[2]; // 
+	MPI_Status stats[4]; // required variable for non-blocking call
+	MPI_Request reqs[4]; // require variable for waitall  routine 
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD,&numtasks);
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	
-	myFile.open("result/result.csv",std::ios::app); // open in append mode
+	myFile.open("result/resultNon.csv",std::ios::app); // open in append mode
 	
 	if(myFile.is_open()){
 	
@@ -57,16 +58,18 @@ int main(int argc,char *argv[]){
 
 		while(cond !=rank){
 
-			MPI_Recv(&buf[0],1,MPI_INT,next,itag_rec_next,MPI_COMM_WORLD,&stats[0]); // buf[0] -> msgleft
+			MPI_Irecv(&buf[0],1,MPI_INT,next,itag_rec_next,MPI_COMM_WORLD,&reqs[0]); // buf[0] -> msgleft
 
-			MPI_Send(&msgleft,1,MPI_INT,prev,itag_rank,MPI_COMM_WORLD);
+			MPI_Isend(&msgleft,1,MPI_INT,prev,itag_rank,MPI_COMM_WORLD,&reqs[1]);
 		
 		// post non blocking receives and sends for neighbord
 
-			MPI_Recv(&buf[1],1,MPI_INT,prev, itag_rec_prev,MPI_COMM_WORLD, &stats[1]); //buf[1] -> msgright
+			MPI_Irecv(&buf[1],1,MPI_INT,prev, itag_rec_prev,MPI_COMM_WORLD, &reqs[2]); //buf[1] -> msgright
 	
-			MPI_Send(&msgright ,1,MPI_INT,next,itag_rank,MPI_COMM_WORLD);
-
+			MPI_Isend(&msgright ,1,MPI_INT,next,itag_rank,MPI_COMM_WORLD,&reqs[3]);
+		
+		// wait for non-blocking operation to complete
+			MPI_Waitall(4,reqs,stats);
 	// The message receive from the next process become the message to send  to the previous process,inversely. 
 			msgleft =  buf[0];
 			msgright = buf[1];	
@@ -86,18 +89,19 @@ int main(int argc,char *argv[]){
 	else
 	{	
 		while( cond!= rank){
-			MPI_Send(&msgleft,1,MPI_INT,prev,itag_rank,MPI_COMM_WORLD);
-			MPI_Recv(&buf[0],1,MPI_INT,next,itag_rec_next,MPI_COMM_WORLD,&stats[0]); // buf[0] -> msgleft
+			MPI_Isend(&msgleft,1,MPI_INT,prev,itag_rank,MPI_COMM_WORLD,&reqs[0]);
+			MPI_Irecv(&buf[0],1,MPI_INT,next,itag_rec_next,MPI_COMM_WORLD,&reqs[1]); // buf[0] -> msgleft
 
 			
 		// post non blocking receives and sends for neighbord
 	
 				 
-			MPI_Send(&msgright,1,MPI_INT,next,itag_rank,MPI_COMM_WORLD);
+			MPI_Isend(&msgright,1,MPI_INT,next,itag_rank,MPI_COMM_WORLD,&reqs[2]);
 		
-			MPI_Recv(&buf[1],1,MPI_INT,prev, itag_rec_prev,MPI_COMM_WORLD, &stats[1]); // buef[1]-> msgright
+			MPI_Irecv(&buf[1],1,MPI_INT,prev, itag_rec_prev,MPI_COMM_WORLD, &reqs[3]); // buef[1]-> msgright
 
 		// wait for all non-blocking operations to complete
+		MPI_Waitall(4,reqs,stats);
 
 			msgleft=buf[0];
 			msgright= buf[1];
